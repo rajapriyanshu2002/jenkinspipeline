@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+    environment{
+        SERVER_CREDENTIAL = credentials('server-credentials')
+    }
+    tools{
+      //gradle, maven, jdk
+      maven 'Maven'
+    }
+    //parameter
+    parameters{
+      string(name:"VERSION", description:'version to deploy on prod')
+      choice(name:"VERSION", choices:['1.1.0',1.2.0''], description: '')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building...'
+                sh "mvn install"
+            }
+        }
+        stage('Test') {
+            when{
+              expression{
+                BRANCH_NAME == 'main'
+              }
+            }
+            steps {
+                echo 'Testing...'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
+                echo "${SERVER_CREDENTIAL}"
+                sh "${SERVER_CREDENTIAL}"
+            }
+        }
+    }
+    post{
+        always{
+            //
+        }
+        success{
+            //
+        }
+        failed{
+            //
+        }
+}
